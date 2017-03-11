@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Go webapp</title>
+</head>
+
+<body>
+	<h1>{{.Main}}</h1>
+	<h2>Graph</h2>
+	<p><img src="http://192.168.39.31/images/graph{{.Date}}.png"></p>
+	<h2>Table</h2>
+	<p>{{.Table |table}}</p>
+</body>
+
+<footer>
+<a href="../top">トップ</a>
+</footer>
+
+</html>

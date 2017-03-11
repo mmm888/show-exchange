@@ -1,0 +1,22 @@
+<script type="text/javascript" language="javascript">
+setTimeout("location.reload()",5000);
+</script>
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Go webapp</title>
+</head>
+
+<body>
+	<h1>Exchange</h1>
+	<h2>Table</h2>
+	<p>{{.Table |table}}</p>
+	<p>time: {{.Main}}</p>
+</body>
+
+<footer>
+<a href="auth">ログイン</a>
+</footer>
+
+</html>

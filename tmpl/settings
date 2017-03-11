@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <title>Go webapp</title>
+</head>
+
+<body>
+<h1>{{.Main}}</h1>
+
+<h2>追加・削除する値を入れてください</h2>
+<form action="redirect" method="POST">
+  <table>
+    <tr>
+      <th>ID</th>
+      <td><input type="text" name="id"></td>
+    </tr>
+  </table><br>
+  <input type="submit" name="Value"  value="Add">
+  <input type="submit" name="Value"  value="Delete">
+</form>
+
+</body>
+</html>

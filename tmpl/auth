@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <title>Go webapp</title>
+</head>
+
+<body>
+<h1>{{.Main}}</h1>
+
+<h2>IDとパスワードを入力してください</h2>
+<form action="settings" method="POST">
+  <table>
+    <tr>
+      <th>ID</th>
+      <td><input type="text" name="id"></td>
+    </tr>
+    <tr>
+      <th>Pass</th>
+      <td><input type="password" name="pass"></td>
+    </tr>
+  </table><br>
+  <input type="submit" name="login"  value="ログイン">
+  <input type="hidden" name="action" value="LOGIN">
+</form>
+
+</body>
+</html>
