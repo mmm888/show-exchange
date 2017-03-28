@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./mytype"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -11,52 +12,15 @@ import (
 	"time"
 )
 
-var exchange_data []string
-var exchange_map = map[string]int{"GBPNZD": 0, "CADJPY": 1, "GBPAUD": 2, "AUDJPY": 3, "AUDNZD": 4, "EURCAD": 5, "EURUSD": 6, "NZDJPY": 7, "USDCAD": 8, "EURGBP": 9, "GBPUSD": 10, "ZARJPY": 11, "EURCHF": 12, "CHFJPY": 13, "AUDUSD": 14, "USDCHF": 15, "EURJPY": 16, "GBPCHF": 17, "EURNZD": 18, "NZDUSD": 19, "USDJPY": 20, "EURAUD": 21, "AUDCHF": 22, "GBPJPY": 23}
-
-type Exchange_db struct {
-	time string
-	open string
-	bid  string
-	ask  string
-	high string
-	low  string
-}
-
-type Gaitame struct {
-	Quotes []struct {
-		Code string `json:"currencyPairCode"`
-		Open string `json:"open"`
-		Bid  string `json:"bid"`
-		Ask  string `json:"ask"`
-		High string `json:"high"`
-		Low  string `json:"low"`
-	} `json:"quotes"`
-	time string
-}
-
-type testTemplate struct {
-	Main  string
-	Sub   string
-	Graph string
-	Date  string
-	Table string
-}
-
-type User struct {
-	user string
-	pass string
-}
-
-func GetData() Gaitame {
+func GetData() mytype.Gaitame {
 	url := "http://www.gaitameonline.com/rateaj/getrate"
 	resp, err := http.Get(url)
 	if err != nil {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	var result Gaitame
-	result.time = time.Now().Format("2006-01-02 15:04:05")
+	var result mytype.Gaitame
+	result.Time = time.Now().Format("2006-01-02 15:04:05")
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		panic(err)
 	}
@@ -64,7 +28,7 @@ func GetData() Gaitame {
 }
 
 func TopHandler(w http.ResponseWriter, r *http.Request) {
-	var data testTemplate
+	var data mytype.TestTemplate
 	result := GetData()
 	data.Table = "<table><tr><th>Name</th><th>Bid</th><th>Ask</th><th>Change(%)</th></tr>"
 	funcMap := template.FuncMap{
@@ -72,14 +36,14 @@ func TopHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var open, bid float64
 	var change string
-	for _, name := range exchange_data {
-		open, _ = strconv.ParseFloat(result.Quotes[exchange_map[name]].Open, 64)
-		bid, _ = strconv.ParseFloat(result.Quotes[exchange_map[name]].Bid, 64)
+	for _, name := range mytype.Exchange_data {
+		open, _ = strconv.ParseFloat(result.Quotes[mytype.Exchange_map[name]].Open, 64)
+		bid, _ = strconv.ParseFloat(result.Quotes[mytype.Exchange_map[name]].Bid, 64)
 		change = fmt.Sprintf("%3.2f", (bid-open)/open*100)
-		data.Table = data.Table + "<tr><td>" + result.Quotes[exchange_map[name]].Code + "</a></td><td>" + result.Quotes[exchange_map[name]].Bid + "</td><td>" + result.Quotes[exchange_map[name]].Ask + "</td><td>" + change + "</td></tr>"
+		data.Table = data.Table + "<tr><td>" + result.Quotes[mytype.Exchange_map[name]].Code + "</a></td><td>" + result.Quotes[mytype.Exchange_map[name]].Bid + "</td><td>" + result.Quotes[mytype.Exchange_map[name]].Ask + "</td><td>" + change + "</td></tr>"
 	}
 	data.Table = data.Table + "</table>"
-	data.Main = result.time
+	data.Main = result.Time
 	tmpl, err := template.New("top").Funcs(funcMap).ParseFiles("tmpl/top")
 	if err != nil {
 		panic(err.Error())
@@ -91,7 +55,7 @@ func TopHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SettingsHandler(w http.ResponseWriter, r *http.Request) {
-	var data testTemplate
+	var data mytype.TestTemplate
 	data.Main = "Settings"
 	funcMap := template.FuncMap{
 		"table": func(text string) template.HTML { return template.HTML(text) },
@@ -104,23 +68,23 @@ func SettingsHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func add(exchange_data []string, id string) []string {
+func add(id string) []string {
 	var judge int
-	for _, name := range exchange_data {
+	for _, name := range mytype.Exchange_data {
 		if name == id {
 			judge = 1
 			break
 		}
 	}
 	if judge == 0 {
-		exchange_data = append(exchange_data, id)
+		mytype.Exchange_data = append(mytype.Exchange_data, id)
 	}
-	return exchange_data
+	return mytype.Exchange_data
 }
 
-func remove(exchange_data []string, id string) []string {
+func remove(id string) []string {
 	var result []string
-	for _, name := range exchange_data {
+	for _, name := range mytype.Exchange_data {
 		if name != id {
 			result = append(result, name)
 		}
@@ -131,9 +95,9 @@ func remove(exchange_data []string, id string) []string {
 func CalValue(id, val string) {
 	switch val {
 	case "Add":
-		exchange_data = add(exchange_data, id)
+		mytype.Exchange_data = add(id)
 	case "Delete":
-		exchange_data = remove(exchange_data, id)
+		mytype.Exchange_data = remove(id)
 	}
 }
 
@@ -152,14 +116,14 @@ func RedirectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	exchange_data = append(exchange_data, "USDJPY")
-	exchange_data = append(exchange_data, "EURJPY")
-	exchange_data = append(exchange_data, "GBPJPY")
-	exchange_data = append(exchange_data, "CHFJPY")
-	exchange_data = append(exchange_data, "ZARJPY")
-	exchange_data = append(exchange_data, "NZDJPY")
-	exchange_data = append(exchange_data, "AUDJPY")
-	exchange_data = append(exchange_data, "EURUSD")
+	mytype.Exchange_data = append(mytype.Exchange_data, "USDJPY")
+	mytype.Exchange_data = append(mytype.Exchange_data, "EURJPY")
+	mytype.Exchange_data = append(mytype.Exchange_data, "GBPJPY")
+	mytype.Exchange_data = append(mytype.Exchange_data, "CHFJPY")
+	mytype.Exchange_data = append(mytype.Exchange_data, "ZARJPY")
+	mytype.Exchange_data = append(mytype.Exchange_data, "NZDJPY")
+	mytype.Exchange_data = append(mytype.Exchange_data, "AUDJPY")
+	mytype.Exchange_data = append(mytype.Exchange_data, "EURUSD")
 
 	http.HandleFunc("/", TopHandler)
 	http.HandleFunc("/settings", SettingsHandler)
